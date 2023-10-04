@@ -21,10 +21,9 @@ def determinar_estado(input_str: str) -> State:
     return State.INEXISTENT
 
 
-# definir o tipo que será retornado da função abaixo
 def ler_arquivo(arquivo: str) -> str:
     conteudo = ""
-    with open("example_input.c", "r") as arquivo:
+    with open(arquivo, "r") as arquivo:
         conteudo = arquivo.read()
     return conteudo
 
