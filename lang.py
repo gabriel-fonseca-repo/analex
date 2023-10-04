@@ -6,6 +6,7 @@ class TokenType(Enum):
     KEYWORD = 2
     ALPHA = 3
     NUM = 4
+    COMMENT = 5
     NONE = 99
 
 

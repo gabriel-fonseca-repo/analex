@@ -1,4 +1,6 @@
+from typing import List
 from lang import KEYWORDS_LIST, SYMBOLS_LIST, State
+import re
 
 
 def determinar_estado(input_str: str) -> State:
@@ -30,13 +32,18 @@ def ler_arquivo(arquivo: str) -> str:
 
 def recortar_valor_numerico(palavra: str) -> (str, str):
     valor = ""
+    simbolo = None
+
+    if comeca_com_simbolo(palavra):
+        (simbolo, palavra) = recortar_simbolo(palavra)
+
     for caractere in palavra:
         if caractere.isdigit():
             valor += caractere
         else:
             break
     resto = palavra[len(valor) :]
-    return (valor, resto)
+    return (valor, resto, simbolo)
 
 
 def recortar_valor_str(palavra: str) -> (str, str):
@@ -95,3 +102,18 @@ def comeca_com_alpha(palavra: str) -> bool:
         else:
             return False
     return True
+
+
+def simbolo_multicaractere(simbolo: str) -> bool:
+    return simbolo in SYMBOLS_LIST and len(simbolo) > 1
+
+
+def str_valida(str_value: str) -> bool:
+    return str_value is not None and str_value != ""
+
+
+def extrair_comentarios(codigo: str) -> List[str]:
+    padrao_comentario = r"/\*(.*?)\*/"
+    comentarios = re.findall(padrao_comentario, codigo, re.DOTALL)
+    codigo_sem_comentarios = re.sub(padrao_comentario, "", codigo, flags=re.DOTALL)
+    return (comentarios, codigo_sem_comentarios)

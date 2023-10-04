@@ -1,9 +1,15 @@
-int main( void) {
+/*oiawdiojawjidiawjdi*/
+
+int main(void) {
     int a = 1;
     int b = 2;
     int c = 3;
     int d = 5;
     int ç = 2;
+
+    /*oiawdiojawjidiawjdiaw´dawdpĺawl´d
+      apokwdawpokdkpoa
+    ioawjdoijawiojdijiaw*/
 
     if (a == 1) {
         if (b == 2) {
@@ -11,6 +17,8 @@ int main( void) {
                 printf("Sim!\n");
                 if (d == 4) {
                     return 1;
+                    /*oiawdiojawjidiawjdiaw´dawdpĺawl´d apokwdawpokdkpoa
+                     * ioawjdoijawiojdijiaw*/
                 } else {
                     printf("Não!\n");
                 }

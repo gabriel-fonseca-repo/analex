@@ -2,9 +2,12 @@ from typing import List
 from lang import State, Token, TokenType
 from util import (
     determinar_estado,
+    extrair_comentarios,
     ler_arquivo,
     recortar_valor_numerico,
     recortar_valor_str,
+    simbolo_multicaractere,
+    str_valida,
 )
 
 
@@ -22,16 +25,28 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
             continue
 
         if estado_caractere is State.NUMERIC:
-            (numero, resto) = recortar_valor_numerico(palavra)
+            (numero, resto, simbolo) = recortar_valor_numerico(palavra)
             PALAVRAS_TOKEN_LIST.append(Token(numero, TokenType.NUM))
+            if str_valida(simbolo):
+                if simbolo_multicaractere(simbolo):
+                    PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
+                else:
+                    PALAVRAS_TOKEN_LIST.extend(
+                        [Token(tk_simbolo, TokenType.SYMBOL) for tk_simbolo in simbolo]
+                    )
             PALAVRAS_TOKEN_LIST.extend(analisar_cada_caractere(resto))
             break
         if estado_caractere is State.ALPHANUMERIC:
             (str_alpha, resto, simbolo, nalpha) = recortar_valor_str(palavra)
             PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.ALPHA))
-            if simbolo is not None and simbolo != "":
-                PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
-            if nalpha is not None and nalpha != "":
+            if str_valida(simbolo):
+                if simbolo_multicaractere(simbolo):
+                    PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
+                else:
+                    PALAVRAS_TOKEN_LIST.extend(
+                        [Token(tk_simbolo, TokenType.SYMBOL) for tk_simbolo in simbolo]
+                    )
+            if str_valida(nalpha):
                 PALAVRAS_TOKEN_LIST.append(Token(nalpha, TokenType.ALPHA))
             PALAVRAS_TOKEN_LIST.extend(analisar_cada_caractere(resto))
             break
@@ -43,8 +58,12 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
 
 
 def analisar_codigo_fonte(conteudo: str):
-    palavras = conteudo.split()
+    (comentarios, codigo_sem_comentarios) = extrair_comentarios(conteudo)
+    palavras = codigo_sem_comentarios.split()
     TOKENS_LIST = []
+    TOKENS_LIST.extend(
+        [Token(comentario, TokenType.COMMENT) for comentario in comentarios]
+    )
 
     for palavra in palavras:
         estado_palavra = determinar_estado(palavra)
@@ -70,6 +89,7 @@ def analisar_codigo_fonte(conteudo: str):
 
 
 conteudo = ler_arquivo("example_input.c")
+# conteudo = "(A12345+(a1+22)*42)"
 tokens: List[Token] = analisar_codigo_fonte(conteudo)
 
 tokens_invalidos = [token for token in tokens if token.classe is TokenType.NONE]
