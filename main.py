@@ -16,7 +16,7 @@ from util import (
 def analisar_cada_caractere(palavra: str) -> List[Token]:
     PALAVRAS_TOKEN_LIST = []
 
-    for caractere in palavra:
+    for indice, caractere in enumerate(palavra):
         estado_caractere = determinar_estado(caractere)
 
         if estado_caractere is State.INEXISTENT:
@@ -38,13 +38,13 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
                     )
             PALAVRAS_TOKEN_LIST.extend(analisar_cada_caractere(resto))
             break
+
         if estado_caractere is State.ALPHANUMERIC:
             (str_alpha, resto, simbolo, nalpha) = recortar_valor_str(palavra)
             if str_contem_palavra_chave(str_alpha):
                 (palavras_chave, str_alpha) = extrair_palavras_chave(str_alpha)
                 for palavra_chave in palavras_chave:
                     PALAVRAS_TOKEN_LIST.append(Token(palavra_chave, TokenType.KEYWORD))
-
             if str_valida(simbolo):
                 if simbolo_multicaractere(simbolo):
                     PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
@@ -54,7 +54,6 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
                     )
             if str_valida(nalpha):
                 PALAVRAS_TOKEN_LIST.append(Token(nalpha, TokenType.ALPHA))
-
             PALAVRAS_TOKEN_LIST.extend(analisar_cada_caractere(resto))
             break
 
@@ -67,10 +66,7 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
 def analisar_codigo_fonte(conteudo: str):
     (comentarios, codigo_sem_comentarios) = extrair_comentarios(conteudo)
     palavras = codigo_sem_comentarios.split()
-    TOKENS_LIST = []
-    TOKENS_LIST.extend(
-        [Token(comentario, TokenType.COMMENT) for comentario in comentarios]
-    )
+    TOKENS_LIST = [Token(comentario, TokenType.COMMENT) for comentario in comentarios]
 
     for palavra in palavras:
         estado_palavra = determinar_estado(palavra)

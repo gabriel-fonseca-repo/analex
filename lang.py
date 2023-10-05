@@ -20,6 +20,31 @@ class State(Enum):
     INEXISTENT = 99
 
 
+class Symbols(Enum):
+    OPEN_PARENTHESIS = "("
+    CLOSE_PARENTHESIS = ")"
+    OPEN_BRACES = "{"
+    CLOSE_BRACES = "}"
+    OPEN_BRACKETS = "["
+    CLOSE_BRACKETS = "]"
+    DIVISION = "/"
+    MULTI_LINE_COMMENT_START = "/*"
+    MULTI_LINE_COMMENT_END = "*/"
+    ADDITION = "+"
+    SUBTRACTION = "-"
+    MULTIPLICATION = "*"
+    ASSIGNMENT = "="
+    EQUAL = "=="
+    LESS_THAN = "<"
+    LESS_THAN_OR_EQUAL = "<="
+    GREATER_THAN = ">"
+    GREATER_THAN_OR_EQUAL = ">="
+    NOT = "!"
+    NOT_EQUAL = "!="
+    COMMA = ","
+    SEMICOLON = ";"
+
+
 class Token:
     classe: TokenType
     valor: str
