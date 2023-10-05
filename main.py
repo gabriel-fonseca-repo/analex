@@ -3,10 +3,12 @@ from lang import State, Token, TokenType
 from util import (
     determinar_estado,
     extrair_comentarios,
+    extrair_palavras_chave,
     ler_arquivo,
     recortar_valor_numerico,
     recortar_valor_str,
     simbolo_multicaractere,
+    str_contem_palavra_chave,
     str_valida,
 )
 
@@ -38,7 +40,11 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
             break
         if estado_caractere is State.ALPHANUMERIC:
             (str_alpha, resto, simbolo, nalpha) = recortar_valor_str(palavra)
-            PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.ALPHA))
+            if str_contem_palavra_chave(str_alpha):
+                (palavras_chave, str_alpha) = extrair_palavras_chave(str_alpha)
+                for palavra_chave in palavras_chave:
+                    PALAVRAS_TOKEN_LIST.append(Token(palavra_chave, TokenType.KEYWORD))
+
             if str_valida(simbolo):
                 if simbolo_multicaractere(simbolo):
                     PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
@@ -48,6 +54,7 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
                     )
             if str_valida(nalpha):
                 PALAVRAS_TOKEN_LIST.append(Token(nalpha, TokenType.ALPHA))
+
             PALAVRAS_TOKEN_LIST.extend(analisar_cada_caractere(resto))
             break
 

@@ -117,3 +117,17 @@ def extrair_comentarios(codigo: str) -> List[str]:
     comentarios = re.findall(padrao_comentario, codigo, re.DOTALL)
     codigo_sem_comentarios = re.sub(padrao_comentario, "", codigo, flags=re.DOTALL)
     return (comentarios, codigo_sem_comentarios)
+
+
+def str_contem_palavra_chave(str_value: str) -> bool:
+    for palavra_chave in KEYWORDS_LIST:
+        if palavra_chave in str_value:
+            return True
+    return False
+
+
+def extrair_palavras_chave(str_value: str):
+    regex = "|".join(re.escape(palavra) for palavra in KEYWORDS_LIST)
+    palavras_chave_encontradas = re.findall(regex, str_value)
+    string_sem_palavras_chave = re.sub(regex, "", str_value)
+    return (palavras_chave_encontradas, string_sem_palavras_chave)
