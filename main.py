@@ -147,6 +147,7 @@ def analisar_codigo_fonte(conteudo: str):
 
 conteudo = ler_arquivo("example_input.c")
 # conteudo = "(A12345+(a1+22)*42)"
+# conteudo = "int x = 42; /* Isso é um comentário */ y = x + 10; identificador123 a 1 B aleatoria else if while for return void 12345 /* Outro comentário */"
 tokens: List[Token] = analisar_codigo_fonte(conteudo)
 
 tokens_invalidos = [token for token in tokens if token.classe is TokenType.NONE]
@@ -154,6 +155,7 @@ tokens_validos = [token for token in tokens if token.classe is not TokenType.NON
 
 tokens_validos_sort = sorted(tokens_validos, key=lambda token: token.classe.value)
 
+print()
 print("Tokens inválidos:")
 for token in tokens_invalidos:
     print(f"{(token.classe.name + ':'):10s} {token.valor}")
