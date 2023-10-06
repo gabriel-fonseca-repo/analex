@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 /*oiawdiojawjidiawjdi */
 
 int main(void) {
@@ -32,5 +35,6 @@ int main(void) {
         i++;
     }
 
-    returnwhi213wdkleifvoid;
+    // returnwhi213wdkleifvoid;
+    return 0;
 }

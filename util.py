@@ -135,3 +135,11 @@ def extrair_palavras_chave(str_value: str):
     partes_string = re.split(regex, str_value)
     partes_string = [parte for parte in partes_string if parte]
     return (palavras_chave_encontradas, partes_string)
+
+
+def remover_char_at(palavra: str, indice: int) -> str:
+    return palavra[:indice] + palavra[indice + 1 :]
+
+
+def eh_palavra_chave(palavra: str) -> bool:
+    return palavra in KEYWORDS_LIST
