@@ -16,7 +16,8 @@ class State(Enum):
     KEYWORD = 3
     COMMENT = 4
     NUMERIC = 5
-    ALPHANUMERIC = 6
+    ALPHABETIC = 6
+    ALPHANUMERIC = 7
     INEXISTENT = 99
 
 

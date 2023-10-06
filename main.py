@@ -1,16 +1,14 @@
 from typing import List
+
 from lang import State, Symbols, Token, TokenType
 from util import (
     determinar_estado,
     eh_inicio_comentario,
     eh_palavra_chave,
-    extrair_palavras_chave,
     ler_arquivo,
     recortar_valor_numerico,
     recortar_valor_str,
-    remover_char_at,
     simbolo_multicaractere,
-    str_contem_palavra_chave,
     str_valida,
 )
 
@@ -42,7 +40,7 @@ def analisar_cada_caractere(
             if str_valida(simbolo):
                 if simbolo_multicaractere(simbolo):
                     PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
-                else:
+                elif not palavra.startswith(simbolo):
                     PALAVRAS_TOKEN_LIST.extend(
                         [Token(tk_simbolo, TokenType.SYMBOL) for tk_simbolo in simbolo]
                     )
@@ -54,9 +52,9 @@ def analisar_cada_caractere(
             PALAVRAS_TOKEN_LIST.extend(tokens)
             break
 
-        if estado_caractere is State.ALPHANUMERIC:
+        if estado_caractere is State.ALPHABETIC:
             (str_alpha, resto, simbolo, nalpha) = recortar_valor_str(palavra)
-            if str_valida(simbolo):
+            if str_valida(simbolo) and not palavra.startswith(simbolo):
                 if simbolo_multicaractere(simbolo):
                     PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
                 else:
@@ -68,20 +66,12 @@ def analisar_cada_caractere(
             if str_valida(str_alpha):
                 if eh_palavra_chave(str_alpha):
                     PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.KEYWORD))
-                else:
+                elif str_alpha.isalpha():
                     PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.ALPHA))
-                # if str_contem_palavra_chave(str_alpha):
-                #     (palavras_chave, str_alpha) = extrair_palavras_chave(str_alpha)
-                #     for palavra_chave in palavras_chave:
-                #         PALAVRAS_TOKEN_LIST.append(
-                #             Token(palavra_chave, TokenType.KEYWORD)
-                #         )
-                #     for alpha_encontrado in str_alpha:
-                #         PALAVRAS_TOKEN_LIST.append(
-                #             Token(alpha_encontrado, TokenType.ALPHA)
-                #         )
-                # else:
-                #     PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.ALPHA))
+                elif str_alpha.isdigit():
+                    PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.NUM))
+                elif str_alpha.isalnum():
+                    PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.NONE))
             (
                 tokens,
                 eh_comentario,
@@ -129,7 +119,7 @@ def analisar_codigo_fonte(conteudo: str):
 
         if estado_palavra is State.IDENTIFIER:
             continue
-        elif estado_palavra is State.ALPHANUMERIC:
+        elif estado_palavra is State.ALPHABETIC:
             TOKENS_LIST.append(Token(palavra, TokenType.ALPHA))
             continue
         elif estado_palavra is State.NUMERIC:
@@ -140,6 +130,9 @@ def analisar_codigo_fonte(conteudo: str):
             continue
         elif estado_palavra is State.KEYWORD:
             TOKENS_LIST.append(Token(palavra, TokenType.KEYWORD))
+            continue
+        elif estado_palavra is State.ALPHANUMERIC:
+            TOKENS_LIST.append(Token(palavra, TokenType.NONE))
             continue
         else:
             (
@@ -169,10 +162,4 @@ print()
 
 print("Tokens válidos:")
 for token in tokens_validos_sort:
-    print(f"{(token.classe.name + ':'):10s} {token.valor}")
-
-print()
-
-print("Tokens:")
-for token in tokens:
     print(f"{(token.classe.name + ':'):10s} {token.valor}")

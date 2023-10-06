@@ -1,6 +1,7 @@
-from typing import List
-from lang import KEYWORDS_LIST, SYMBOLS_LIST, State, Symbols
 import re
+from typing import List, Tuple
+
+from lang import KEYWORDS_LIST, SYMBOLS_LIST, State, Symbols
 
 
 def determinar_estado(input_str: str) -> State:
@@ -12,9 +13,11 @@ def determinar_estado(input_str: str) -> State:
 
     # Testar letras e números
     if input_str.isalpha():
-        return State.ALPHANUMERIC
+        return State.ALPHABETIC
     if input_str.isdigit():
         return State.NUMERIC
+    if input_str.isalnum():
+        return State.ALPHANUMERIC
 
     # Pular espaços em branco
     elif input_str.isspace():
@@ -40,7 +43,7 @@ def ler_arquivo(arquivo: str) -> str:
     return conteudo
 
 
-def recortar_valor_numerico(palavra: str) -> (str, str):
+def recortar_valor_numerico(palavra: str) -> Tuple[str, str, str]:
     valor = ""
     simbolo = None
 
@@ -56,10 +59,10 @@ def recortar_valor_numerico(palavra: str) -> (str, str):
     return (valor, resto, simbolo)
 
 
-def recortar_valor_str(palavra: str) -> (str, str):
+def recortar_valor_str(palavra: str) -> Tuple[str, str, str, str]:
     valor = ""
-    simbolo = None
-    nalpha = None
+    simbolo = ""
+    nalpha = ""
 
     if comeca_com_simbolo(palavra):
         (simbolo, palavra) = recortar_simbolo(palavra)
@@ -68,7 +71,7 @@ def recortar_valor_str(palavra: str) -> (str, str):
         (nalpha, palavra) = recortar_nao_alpha(palavra)
 
     for caractere in palavra:
-        if caractere.isalpha():
+        if caractere.isalpha() or caractere.isdigit():
             valor += caractere
         else:
             break
@@ -76,7 +79,7 @@ def recortar_valor_str(palavra: str) -> (str, str):
     return (valor, resto, simbolo, nalpha)
 
 
-def recortar_nao_alpha(palavra: str) -> (str, str):
+def recortar_nao_alpha(palavra: str) -> Tuple[str, str]:
     valor = ""
     for caractere in palavra:
         if not caractere.isalpha():
@@ -87,7 +90,7 @@ def recortar_nao_alpha(palavra: str) -> (str, str):
     return (valor, resto)
 
 
-def recortar_simbolo(palavra: str) -> (str, str):
+def recortar_simbolo(palavra: str) -> Tuple[str, str]:
     valor = ""
     for caractere in palavra:
         if caractere in SYMBOLS_LIST:
@@ -103,6 +106,10 @@ def comeca_com_simbolo(palavra: str) -> bool:
         if palavra.startswith(simbolo):
             return True
     return False
+
+
+def comeca_com_esse_simbolo(palavra: str, simbolo: str) -> bool:
+    return palavra.startswith(simbolo)
 
 
 def comeca_com_alpha(palavra: str) -> bool:
@@ -143,3 +150,10 @@ def remover_char_at(palavra: str, indice: int) -> str:
 
 def eh_palavra_chave(palavra: str) -> bool:
     return palavra in KEYWORDS_LIST
+
+
+def str_tem_simbolo_nela(palavra: str) -> bool:
+    for simbolo in SYMBOLS_LIST:
+        if simbolo in palavra:
+            return True
+    return False
