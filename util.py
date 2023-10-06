@@ -1,5 +1,5 @@
 from typing import List
-from lang import KEYWORDS_LIST, SYMBOLS_LIST, State
+from lang import KEYWORDS_LIST, SYMBOLS_LIST, State, Symbols
 import re
 
 
@@ -21,6 +21,16 @@ def determinar_estado(input_str: str) -> State:
         return State.IDENTIFIER
 
     return State.INEXISTENT
+
+
+def eh_inicio_comentario(palavra: str, indice: int) -> bool:
+    if palavra == Symbols.MULTI_LINE_COMMENT_START:
+        return True
+    caractere = palavra[indice]
+    if caractere == Symbols.DIVISION.value:
+        if indice + 1 < len(palavra):
+            return palavra[indice + 1] == Symbols.MULTIPLICATION.value
+    return False
 
 
 def ler_arquivo(arquivo: str) -> str:
@@ -112,13 +122,6 @@ def str_valida(str_value: str) -> bool:
     return str_value is not None and str_value != ""
 
 
-def extrair_comentarios(codigo: str) -> List[str]:
-    padrao_comentario = r"/\*(.*?)\*/"
-    comentarios = re.findall(padrao_comentario, codigo, re.DOTALL)
-    codigo_sem_comentarios = re.sub(padrao_comentario, "", codigo, flags=re.DOTALL)
-    return (comentarios, codigo_sem_comentarios)
-
-
 def str_contem_palavra_chave(str_value: str) -> bool:
     for palavra_chave in KEYWORDS_LIST:
         if palavra_chave in str_value:
@@ -129,5 +132,6 @@ def str_contem_palavra_chave(str_value: str) -> bool:
 def extrair_palavras_chave(str_value: str):
     regex = "|".join(re.escape(palavra) for palavra in KEYWORDS_LIST)
     palavras_chave_encontradas = re.findall(regex, str_value)
-    string_sem_palavras_chave = re.sub(regex, "", str_value)
-    return (palavras_chave_encontradas, string_sem_palavras_chave)
+    partes_string = re.split(regex, str_value)
+    partes_string = [parte for parte in partes_string if parte]
+    return (palavras_chave_encontradas, partes_string)

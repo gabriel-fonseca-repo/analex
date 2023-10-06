@@ -1,8 +1,8 @@
 from typing import List
-from lang import State, Token, TokenType
+from lang import State, Symbols, Token, TokenType
 from util import (
     determinar_estado,
-    extrair_comentarios,
+    eh_inicio_comentario,
     extrair_palavras_chave,
     ler_arquivo,
     recortar_valor_numerico,
@@ -13,10 +13,25 @@ from util import (
 )
 
 
-def analisar_cada_caractere(palavra: str) -> List[Token]:
+def analisar_cada_caractere(
+    palavra: str,
+    eh_comentario: bool,
+    comentario: str,
+) -> List[Token]:
     PALAVRAS_TOKEN_LIST = []
 
     for indice, caractere in enumerate(palavra):
+        if not eh_comentario:
+            eh_comentario = eh_inicio_comentario(palavra, indice)
+
+        if eh_comentario:
+            comentario += caractere
+            if comentario.endswith("*/"):
+                PALAVRAS_TOKEN_LIST.append(Token(comentario, TokenType.COMMENT))
+                comentario = ""
+                eh_comentario = False
+            continue
+
         estado_caractere = determinar_estado(caractere)
 
         if estado_caractere is State.INEXISTENT:
@@ -36,15 +51,16 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
                     PALAVRAS_TOKEN_LIST.extend(
                         [Token(tk_simbolo, TokenType.SYMBOL) for tk_simbolo in simbolo]
                     )
-            PALAVRAS_TOKEN_LIST.extend(analisar_cada_caractere(resto))
+            (
+                tokens,
+                eh_comentario,
+                comentario,
+            ) = analisar_cada_caractere(resto, eh_comentario, comentario)
+            PALAVRAS_TOKEN_LIST.extend(tokens)
             break
 
         if estado_caractere is State.ALPHANUMERIC:
             (str_alpha, resto, simbolo, nalpha) = recortar_valor_str(palavra)
-            if str_contem_palavra_chave(str_alpha):
-                (palavras_chave, str_alpha) = extrair_palavras_chave(str_alpha)
-                for palavra_chave in palavras_chave:
-                    PALAVRAS_TOKEN_LIST.append(Token(palavra_chave, TokenType.KEYWORD))
             if str_valida(simbolo):
                 if simbolo_multicaractere(simbolo):
                     PALAVRAS_TOKEN_LIST.append(Token(simbolo, TokenType.SYMBOL))
@@ -54,21 +70,55 @@ def analisar_cada_caractere(palavra: str) -> List[Token]:
                     )
             if str_valida(nalpha):
                 PALAVRAS_TOKEN_LIST.append(Token(nalpha, TokenType.ALPHA))
-            PALAVRAS_TOKEN_LIST.extend(analisar_cada_caractere(resto))
+            if str_valida(str_alpha):
+                if str_contem_palavra_chave(str_alpha):
+                    (palavras_chave, str_alpha) = extrair_palavras_chave(str_alpha)
+                    for palavra_chave in palavras_chave:
+                        PALAVRAS_TOKEN_LIST.append(
+                            Token(palavra_chave, TokenType.KEYWORD)
+                        )
+                    for alpha_encontrado in str_alpha:
+                        PALAVRAS_TOKEN_LIST.append(
+                            Token(alpha_encontrado, TokenType.ALPHA)
+                        )
+                else:
+                    PALAVRAS_TOKEN_LIST.append(Token(str_alpha, TokenType.ALPHA))
+            (
+                tokens,
+                eh_comentario,
+                comentario,
+            ) = analisar_cada_caractere(resto, eh_comentario, comentario)
+            PALAVRAS_TOKEN_LIST.extend(tokens)
             break
 
         if estado_caractere is State.IDENTIFIER:
             continue
 
-    return PALAVRAS_TOKEN_LIST
+    return (PALAVRAS_TOKEN_LIST, eh_comentario, comentario)
 
 
 def analisar_codigo_fonte(conteudo: str):
-    (comentarios, codigo_sem_comentarios) = extrair_comentarios(conteudo)
-    palavras = codigo_sem_comentarios.split()
-    TOKENS_LIST = [Token(comentario, TokenType.COMMENT) for comentario in comentarios]
+    global eh_comentario
+    global comentario
+
+    eh_comentario = False
+    comentario = ""
+
+    palavras = conteudo.split()
+    TOKENS_LIST = []
 
     for palavra in palavras:
+        if not eh_comentario:
+            eh_comentario = palavra.startswith(Symbols.MULTI_LINE_COMMENT_START.value)
+
+        if eh_comentario:
+            comentario += palavra + " " if palavra != "*/" else palavra
+            if comentario.endswith("*/"):
+                TOKENS_LIST.append(Token(comentario, TokenType.COMMENT))
+                comentario = ""
+                eh_comentario = False
+            continue
+
         estado_palavra = determinar_estado(palavra)
 
         if estado_palavra is State.IDENTIFIER:
@@ -86,7 +136,12 @@ def analisar_codigo_fonte(conteudo: str):
             TOKENS_LIST.append(Token(palavra, TokenType.KEYWORD))
             continue
         else:
-            TOKENS_LIST.extend(analisar_cada_caractere(palavra))
+            (
+                tokens,
+                eh_comentario,
+                comentario,
+            ) = analisar_cada_caractere(palavra, eh_comentario, comentario)
+            TOKENS_LIST.extend(tokens)
 
     return TOKENS_LIST
 

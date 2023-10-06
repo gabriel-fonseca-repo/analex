@@ -1,4 +1,4 @@
-/*oiawdiojawjidiawjdi*/
+/*oiawdiojawjidiawjdi */
 
 int main(void) {
     int a = 1;
@@ -7,9 +7,9 @@ int main(void) {
     int d = 5;
     int ç = 2;
 
-    /*oiawdiojawjidiawjdiaw´dawdpĺawl´d
+    /*         oiawdiojawjidiawjdiaw´dawdpĺawl´d
       apokwdawpokdkpoa
-    ioawjdoijawiojdijiaw*/
+    ioawjdoijawiojdijiaw        */
 
     if (a == 1) {
         if (b == 2) {
@@ -17,8 +17,8 @@ int main(void) {
                 printf("Sim!\n");
                 if (d == 4) {
                     return 1;
-                    /*oiawdiojawjidiawjdiaw´dawdpĺawl´d apokwdawpokdkpoa
-                     * ioawjdoijawiojdijiaw*/
+                    /*        oiawdiojawjidiawjdiaw´dawdpĺawl´d apokwdawpokdkpoa
+                     * ioawjdoijawiojdijiaw      */
                 } else {
                     printf("Não!\n");
                 }
